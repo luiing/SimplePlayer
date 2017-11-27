@@ -1,0 +1,113 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+def siteUrl = 'https://github.com/luiing/SimplePlayer'
+def gitUrl = 'https://github.com/luiing/SimplePlayer.git'
+version = "0.0.1"
+android {
+    compileSdkVersion compileVer
+    buildToolsVersion buildVer
+    defaultConfig {
+        minSdkVersion minVer
+        targetSdkVersion targetVer
+        versionCode 1
+        versionName version
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:'+supportVer
+    compile 'com.facebook.fresco:fresco:1.5.0'
+}
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                name 'SimplePlayer'
+                description 'This program is simple media player.'
+                // #CONFIG# // project title
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id  "sweet"//org unique id
+                        // #CONFIG# // your user id (you can write your nickname)
+                        name "luiing"//current user id
+                        // #CONFIG# // your user name
+                        email ""
+                        // #CONFIG# // your email
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    options.encoding = "UTF-8"
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+group = properties.getProperty("bintray.group")
+def bid = properties.getProperty("bintray.id")
+def bname = properties.getProperty("bintray.name")
+def blib = properties.getProperty("bintray.lib")
+def bemail = properties.getProperty("bintray.email")
+
+bintray {
+    user = bname
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        userOrg = bid
+        repo = "maven"
+        name = blib
+        // #CONFIG# project name in jcenter
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}

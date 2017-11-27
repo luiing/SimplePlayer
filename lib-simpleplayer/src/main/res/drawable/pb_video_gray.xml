@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2016.  ZhiLinkTech. All rights reserved.
+  -->
+<animated-rotate
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:pivotX="50%" android:pivotY="50%"
+    android:fromDegrees="0"
+    android:toDegrees="360"
+    >
+    <shape
+        android:shape="ring"
+        android:innerRadiusRatio="3"
+        android:thicknessRatio="50"
+        android:useLevel="false">
+        <gradient
+            android:type="sweep"
+            android:useLevel="false"
+            android:startColor="#F7F7F7"
+            android:centerColor="#F7F7F7"
+            android:centerY="0.50"
+            android:endColor="#B3B4B4"
+             />
+    </shape>
+</animated-rotate>
