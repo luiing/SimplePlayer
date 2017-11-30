@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/viewpager"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="361dp">
-</android.support.v4.view.ViewPager>
+    android:layout_height="360dp"
+    android:id="@+id/video_outside_id"
+    >
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:clickable="true"
+        android:id="@+id/video_container_id"
+        >
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:layout_centerInParent="true"
+            >
+        </android.support.v4.view.ViewPager>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#00ff00"
+            android:layout_marginBottom="10dp"
+            android:layout_alignParentBottom="true"
+            />
+    </RelativeLayout>
+</LinearLayout>

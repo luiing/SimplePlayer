@@ -9,7 +9,7 @@
     android:id="@+id/rl_root"
     >
     <com.uis.lib.simpleplayer.PlayerLayout
-        android:id="@+id/player"
+        android:id="@+id/player_id"
         android:layout_width="match_parent"
         android:layout_height="360dp">
     </com.uis.lib.simpleplayer.PlayerLayout>

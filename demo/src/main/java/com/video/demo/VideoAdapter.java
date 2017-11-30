@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.uis.lib.simpleplayer.Vlog;
 import com.uis.lib.simpleplayer.player.PlayerUtils;
 import com.uis.lib.simpleplayer.PlayerLayout;
 
@@ -71,6 +72,8 @@ public class VideoAdapter extends RecyclerView.Adapter {
 
     static class VpVH extends RecyclerView.ViewHolder{
         ViewPager viewPager;
+        boolean isPlaying;
+        int currentPos = 0;
 
         public VpVH(View itemView) {
             super(itemView);
@@ -78,7 +81,8 @@ public class VideoAdapter extends RecyclerView.Adapter {
         }
 
         public void onViewBind(){
-            VideoPagerAdapter adapter = new VideoPagerAdapter();
+            final VideoPagerAdapter adapter = new VideoPagerAdapter();
+            viewPager.setOffscreenPageLimit(7);
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -87,7 +91,15 @@ public class VideoAdapter extends RecyclerView.Adapter {
 
                 @Override
                 public void onPageSelected(int position) {
-                    PlayerUtils.pause();
+                        if(currentPos == 0){
+                            isPlaying = adapter.isPlaying();
+                        }
+                        if(position == 0 && isPlaying){
+                            PlayerUtils.start();
+                        }else {
+                            PlayerUtils.pause();
+                        }
+                        currentPos = position;
                 }
 
                 @Override
@@ -100,7 +112,6 @@ public class VideoAdapter extends RecyclerView.Adapter {
     }
 
     static class VideoVH extends RecyclerView.ViewHolder{
-        String url;
         PlayerLayout player;
 
         public VideoVH(View itemView) {
@@ -113,8 +124,7 @@ public class VideoAdapter extends RecyclerView.Adapter {
         }
 
         public void onViewBind(String url){
-            this.url = url;
-            player.start(url);
+            player.start(url,DemoApp.URL);
             Log.e("xx","onViewBind...");
         }
     }
