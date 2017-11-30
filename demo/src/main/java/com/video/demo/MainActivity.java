@@ -85,13 +85,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.e("xx","onResume....");
-        PlayerUtils.start();
+        if(VideoPagerAdapter.isPlaying()) {
+            PlayerUtils.start();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.e("xx","onPause....");
+        VideoPagerAdapter.setPlaying();
         PlayerUtils.pause();
     }
 

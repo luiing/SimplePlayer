@@ -23,7 +23,7 @@ android {
         }
     }
     dataBinding {
-        enabled true
+        enabled false
     }
 }
 
@@ -31,7 +31,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:recyclerview-v7:'+supportVer
     compile 'com.android.support:design:'+supportVer
-    compile 'com.facebook.fresco:fresco:1.5.0'
+    //compile 'com.facebook.fresco:fresco:1.5.0'
     compile project(':lib-simpleplayer')
-    //compile project(':jcvideoplayer-lib')
+    //compile 'com.uis:lib-simpleplayer:0.0.2'
 }

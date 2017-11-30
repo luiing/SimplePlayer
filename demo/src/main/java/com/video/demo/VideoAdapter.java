@@ -1,5 +1,6 @@
 package com.video.demo;
 
+import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.uis.lib.simpleplayer.Vlog;
 import com.uis.lib.simpleplayer.player.PlayerUtils;
@@ -72,41 +74,17 @@ public class VideoAdapter extends RecyclerView.Adapter {
 
     static class VpVH extends RecyclerView.ViewHolder{
         ViewPager viewPager;
-        boolean isPlaying;
-        int currentPos = 0;
 
         public VpVH(View itemView) {
             super(itemView);
+            final Context mc = itemView.getContext();
             this.viewPager = id(itemView,R.id.viewpager);
         }
 
         public void onViewBind(){
             final VideoPagerAdapter adapter = new VideoPagerAdapter();
             viewPager.setOffscreenPageLimit(7);
-            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-                        if(currentPos == 0){
-                            isPlaying = adapter.isPlaying();
-                        }
-                        if(position == 0 && isPlaying){
-                            PlayerUtils.start();
-                        }else {
-                            PlayerUtils.pause();
-                        }
-                        currentPos = position;
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            });
+            viewPager.addOnPageChangeListener(adapter);
             viewPager.setAdapter(adapter);
         }
     }
