@@ -60,6 +60,7 @@ final class PlayerControl implements PlayerListener {
     }
 
     private void init(){
+        Vlog.e(TAG,"-----init-----");
         mPlayer = new MediaPlayer();
         mPlayer.setScreenOnWhilePlaying(true);
         mPlayer.reset();
@@ -70,10 +71,16 @@ final class PlayerControl implements PlayerListener {
                 if(mCallback != null){
                     mCallback.onPrepared(mVideoPlayer);
                 }
+                boolean isPause = false;
                 if(mEntity!=null) {
                     mEntity.canPlay = true;
+                    isPause = mEntity.isPause;
                 }
-                start();
+                if(!isPause) {
+                    start();
+                }else{
+                    onComplete(PlayerComplete.STATE_PREPARE);
+                }
             }
         });
 
@@ -138,7 +145,9 @@ final class PlayerControl implements PlayerListener {
                     mCallback.onSeekComplete(mVideoPlayer);
                 }
                 onProgress(getCurrentPosition());
-                start();
+                if(isPlaying()) {
+                    start();
+                }
             }
         });
     }
@@ -153,6 +162,7 @@ final class PlayerControl implements PlayerListener {
     }
 
     private void prepare(){
+        Vlog.e("xx","-------prepare---------");
         try {
             if(mEntity != null) {
                 mPlayer.setDataSource(mEntity.url);
@@ -168,13 +178,13 @@ final class PlayerControl implements PlayerListener {
         try{
             Vlog.e("xx","--------reset-----------");
             stopTimer();
-            onComplete(PlayerComplete.STATE_RESET);
             if(mPlayer!=null){
                 mPlayer.reset();
             }
         }catch (Exception ex){
             ex.printStackTrace();
         }finally {
+            onComplete(PlayerComplete.STATE_RESET);
             mPlayer = null;
             if(mEntity!=null){
                 mEntity.canPrepare = true;
@@ -188,13 +198,13 @@ final class PlayerControl implements PlayerListener {
         try {
             Vlog.e("xx","--------release-----------");
             stopTimer();
-            onComplete(PlayerComplete.STATE_RELEASE);
             if(mPlayer!=null) {
                 mPlayer.release();
             }
         }catch (Exception ex){
             ex.printStackTrace();
         }finally {
+            onComplete(PlayerComplete.STATE_RELEASE);
             mEntity = null;
             mPlayer = null;
         }
@@ -237,7 +247,7 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public void prepare(String key) {
-        Vlog.a("xx","----prepare---mEntity is null = "+(mEntity==null));
+        Vlog.e("xx","----prepare---mEntity is null = "+(mEntity==null));
         if(mEntity!=null && !mEntity.url.equals(key)){
             release();
         }
@@ -260,6 +270,7 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public boolean isPlaying(String key) {
+        Vlog.e("xx","isPlaying....");
         try {
             if (mPlayer!=null && mEntity!=null && mEntity.url.equals(key) && mPlayer.isPlaying()) {
                 return true;
@@ -272,7 +283,8 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public boolean isRelease() {
-        return mPlayer==null || mCallback==null;
+        onProgress(getCurrentPosition()+1);
+        return (mPlayer!=null && mEntity == null) || mPlayer==null || mCallback==null;
     }
 
     @Override
@@ -283,6 +295,9 @@ final class PlayerControl implements PlayerListener {
                 mPlayer.start();
                 startTimer();
                 onComplete(PlayerComplete.STATE_START);
+                if(mEntity != null){
+                    mEntity.isPause = false;
+                }
             }
         }catch (Exception ex){
             ex.printStackTrace();
@@ -305,8 +320,11 @@ final class PlayerControl implements PlayerListener {
     public void pause(){
         try {
             Vlog.e("xx","--------pause-----------");
+            if(mEntity != null){
+                mEntity.isPause = true;
+            }
             stopTimer();
-            if(mPlayer!=null) {
+            if(mPlayer!=null && isPlaying()) {
                 mPlayer.pause();
                 onComplete(PlayerComplete.STATE_PAUSE);
             }
@@ -393,6 +411,7 @@ final class PlayerControl implements PlayerListener {
     }
 
     private void onComplete(int state){
+        Vlog.e(TAG,"----------onComplete------"+state);
         if(mEntity != null) {
             String key = mEntity.url;
             if (mComplete.containsKey(key)) {

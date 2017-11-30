@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.uis.lib.simpleplayer.player.BasePlayerLayout;
@@ -36,18 +37,22 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     private FrameLayout playerFrame;
     private SimpleDraweeView thumb;
     private ImageView ivPlay;
+    private ImageView ivPlaySmall;
     private ImageView ivPause;
     private ImageView ivBack;
     private ImageView ivClose;
     private ProgressBar pbarLoading;
     private ProgressBar pbarRate;
     private LinearLayout llRate;
+    private LinearLayout llPlay;
     private TextView tvPlayTime;
     private TextView tvTotalTime;
     private ImageView ivFullscreen;
     private SeekBar sbarRate;
     private boolean isInit = false;
     private boolean isSeeking = false;
+    private boolean isVideoLand;
+    private OnScreenListener onScreenListener;
 
     public PlayerLayout(@NonNull Context context) {
         this(context,null);
@@ -68,11 +73,15 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
     @Override
     public void init(){
+        int layoutId = mATTR.getResourceId(R.styleable.PlayerLayout_playLayout,R.layout.video_player_layout);
+        mATTR.recycle();
         setBackgroundColor(Color.BLACK);
         setClickable(true);
-        inflate(getContext(), R.layout.video_player_layout,this);
+        inflate(getContext(),layoutId,this);
         frameLayout = id(R.id.player_id_frame);
         playerFrame = id(R.id.player_id_player);
+        llPlay = id(R.id.player_id_ll_play);
+        ivPlaySmall = id(R.id.player_id_iv_play_s);
         thumb = id(R.id.player_id_thumb);
         ivPlay = id(R.id.player_id_iv_play);
         ivPause = id(R.id.player_id_iv_pause);
@@ -87,17 +96,26 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         ivClose = id(R.id.player_id_iv_close);
         pbarRate.setMax(MaxRate);
         sbarRate.setMax(MaxRate);
-
         frameLayout.setOnClickListener(this);
         ivPlay.setOnClickListener(this);
+        ivPlaySmall.setOnClickListener(this);
         ivPause.setOnClickListener(this);
         ivFullscreen.setOnClickListener(this);
         ivBack.setOnClickListener(this);
         ivClose.setOnClickListener(this);
-
-        llRate.setVisibility(VISIBLE);
-        pbarRate.setVisibility(VISIBLE);
-
+        boolean isEdit = isInEditMode();
+        llRate.setVisibility(isEdit ? VISIBLE:GONE);
+        pbarRate.setVisibility(isEdit ? VISIBLE:GONE);
+        ivPlay.setVisibility(isEdit ? VISIBLE:GONE);
+        llPlay.setVisibility(isEdit ? VISIBLE:GONE);
+        setOnSystemUiVisibilityChangeListener(new OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int visibility) {
+                if(isFullScreen() && visibility != SYSTEM_UI_FLAG_FULLSCREEN){
+                    setUiFullScreen();
+                }
+            }
+        });
         sbarRate.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -115,7 +133,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 isSeeking = false;
-                if(isInit) {
+                if(isInit || isFullScreen()) {
                     int seekTime = totalTime / 1000 * seekBar.getProgress();
                     seekTo(seekTime);
                 }else{
@@ -131,19 +149,22 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                 if(!isFullScreen() && hasFullScreen()){
                     setHasFullScreen(false);
                     createPlayer(false);
-                    playState(isPlaying());
+                    playerStateInit();
+                    displayUi();
                 }
             }
 
             @Override
             public void onComplete(int state) {
-                if(PlayerComplete.STATE_START == state){
-                    startStateUi();
+                if(PlayerComplete.STATE_START == state || PlayerComplete.STATE_PAUSE == state){
+
+                }else if(PlayerComplete.STATE_PREPARE == state){
+                    displayUi();
                 }else {
                     if(PlayerComplete.STATE_RELEASE == state){
                         isInit = false;
                     }
-                    pauseStateUi();
+                    initState(false);
                 }
             }
         };
@@ -152,7 +173,8 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             @Override
             public void onPrepared(PlayerListener vp) {
                 totalTime = vp.getDuration();
-                startStateUi();
+                pbarRate.setVisibility(VISIBLE);
+                initState(true);
                 resize();
             }
 
@@ -171,10 +193,18 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
             @Override
             public void onCompletion(PlayerListener vp) {
-                if(isFullScreen() && isLand()) {
-                    controlFullScreen(true);
+                Vlog.e("xx","isFull="+isFullScreen());
+                if(isFullScreen()) {
+                    controlFullScreen();
                 }
-                pauseStateUi();
+                initState(false);
+            }
+
+            @Override
+            public void onError(PlayerListener vp, int what, int extra) {
+                if(getContext()!=null) {
+                    Toast.makeText(getContext(), "视频播放失败，请检查网络", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -184,17 +214,16 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
             @Override
             public void onProgress(int current, int total) {
+                if(current>0 && thumb.getVisibility() == VISIBLE){
+                    thumb.setVisibility(GONE);
+                }
                 if(totalTime == 0){
                     totalTime = total;
                 }
                 if(current != currentTime){
-                    if(VISIBLE == pbarLoading.getVisibility()) {
-                        pbarLoading.setVisibility(GONE);
-                    }
+                    hideLoading();
                 }else{
-                    if(VISIBLE == pbarLoading.getVisibility()) {
-                        pbarLoading.setVisibility(VISIBLE);
-                    }
+                    showLoading();
                 }
                 currentTime = current;
                 int rate = total==0 ? 0 : (int)getRate(MaxRate,current,total);
@@ -203,16 +232,29 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                     sbarRate.setProgress(rate);
                     tvPlayTime.setText(getTime(current));
                 }
-                if(tvTotalTime.length() == 0) {
-                    tvTotalTime.setText(getTime(total));
-                }
+                tvTotalTime.setText(getTime(total));
             }
 
             @Override
             public void onVideoSizeChanged(PlayerListener vp, int width, int height) {
+                isVideoLand = width > height;
                 resize();
             }
         };
+    }
+
+    private void checkWifi(){
+        if(PlayerUtils.isMobileConnected(getContext())){
+            llPlay.setVisibility(VISIBLE);
+            ivPlay.setVisibility(GONE);
+        }else{
+            ivPlay.setVisibility(VISIBLE);
+            llPlay.setVisibility(GONE);
+        }
+    }
+
+    public void setOnScreenListener(OnScreenListener onScreenListener) {
+        this.onScreenListener = onScreenListener;
     }
 
     @Override
@@ -221,111 +263,185 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         if(id == R.id.player_id_frame){
             displayUi();
         }else if(id == R.id.player_id_iv_close || id == R.id.player_id_iv_back){
-            controlFullScreen(true);
+            controlFullScreen();
         }else if(id == R.id.player_id_iv_fullscreen){
-            controlFullScreen(false);
-        }else if(id == R.id.player_id_iv_play){
-            playState(true);
+            if(onScreenListener!=null){
+                onScreenListener.onScreen(isFullScreen());
+            }else {
+                controlFullScreen();
+            }
+        }else if(id == R.id.player_id_iv_play || id == R.id.player_id_iv_play_s){
+            if(isRelease()){
+                initState(true);
+                showLoading();
+            }
+            playState();
         }else if(id == R.id.player_id_iv_pause){
-            playState(false);
+            playState();
         }
     }
 
-    private void pauseStateUi(){
-        pbarLoading.setVisibility(GONE);
-        ivPlay.setVisibility(VISIBLE);
-        ivPause.setVisibility(GONE);
+    private void initState(boolean isStart){
+        if(isStart){
+            //thumb.setVisibility(GONE);
+            ivPlay.setVisibility(GONE);
+            ivPause.setVisibility(GONE);
+        }else{
+            pbarLoading.setVisibility(GONE);
+            pbarRate.setVisibility(GONE);
+            llRate.setVisibility(GONE);
+            thumb.setVisibility(VISIBLE);
+            checkWifi();
+            ivPause.setVisibility(GONE);
+        }
     }
 
-    private void startStateUi(){
-        pbarLoading.setVisibility(VISIBLE);
-        ivPlay.setVisibility(GONE);
-        ivPause.setVisibility(VISIBLE);
-    }
-
-    private void playState(boolean isPlay){
-        createPlayer(isFullScreen());
-        setDataSource();
-        if(isPlay){
-            startStateUi();
+    private void playState(){
+        playerStateInit();
+        if(!isPlaying()){
             prepare();
             isInit = true;
         }else{
-            pauseStateUi();
             pause();
+        }
+        playerStateUi();
+    }
+
+    private void playerStateInit(){
+        createPlayer(isFullScreen());
+        setDataSource();
+    }
+
+    private void playerStateUi(){
+        if(llRate.getVisibility() == VISIBLE) {
+            boolean isPlaying = isPlaying();
+            if (isPlaying) {
+                ivPlay.setVisibility(GONE);
+                ivPause.setVisibility(VISIBLE);
+            } else {
+                ivPlay.setVisibility(VISIBLE);
+                ivPause.setVisibility(GONE);
+            }
         }
     }
 
-    private void controlFullScreen(boolean isClosed){
+    public void controlFullScreen(){
         if(isFullScreen()){
-            if(isClosed && !isLand()){
-                destroyFullScreen();
-                return;
-            }
-            setLand(!isLand());
-            createFullScreen();
-            if(isLand()){
-                ivClose.setVisibility(GONE);
-                ivBack.setVisibility(VISIBLE);
-                ivFullscreen.setImageResource(R.mipmap.fullscreen_exit);
-            }else{
-                ivClose.setVisibility(VISIBLE);
-                ivBack.setVisibility(GONE);
-                ivFullscreen.setImageResource(R.mipmap.fullscreen_start);
-            }
+            destroyFullScreen();
         }else{
             setHasFullScreen(true);
-            createFullScreen();
+            createFullScreen(isVideoLand);
+        }
+    }
+
+    private void showLoading(){
+        if(GONE == pbarLoading.getVisibility()) {
+            pbarLoading.setVisibility(VISIBLE);
+        }
+    }
+
+    private void hideLoading() {
+        if(VISIBLE == pbarLoading.getVisibility()) {
+            pbarLoading.setVisibility(GONE);
         }
     }
 
     private void displayUi(){
-
+        stopTimer();
+        onCounter(true);
     }
 
-    public void start(String key){
-        if(TextUtils.isEmpty(key)){
+    @Override
+    protected void onCounter(boolean userStop) {
+        if(llRate == null || isRelease() || totalTime<=0){
             return;
         }
-        String[] url = key.split("\\,");
-        if(url.length>1){
-            key = url[0];
-            thumb.setImageURI(url[1]);
+        int vis = llRate.getVisibility();
+        if(vis == VISIBLE){
+            ivPlay.setVisibility(GONE);
+            ivPause.setVisibility(GONE);
+            llRate.setVisibility(GONE);
+            pbarRate.setVisibility(VISIBLE);
+            if(isFullScreen()){
+                ivBack.setVisibility(GONE);
+            }
+        }else{
+            startTimer();
+            pbarRate.setVisibility(GONE);
+            llRate.setVisibility(VISIBLE);
+            playerStateUi();
+            if(isFullScreen()){
+                ivBack.setVisibility(VISIBLE);
+            }
         }
-        setUrl(key);
+    }
+
+    public void start(String videoPath,String thumbPath){
+        if(!TextUtils.isEmpty(thumbPath)) {
+            setThumbUrl(thumbPath);
+            thumb.setImageURI(thumbPath);
+        }
+        if(TextUtils.isEmpty(videoPath)){
+            ivPlay.setVisibility(GONE);
+            llPlay.setVisibility(GONE);
+            return;
+        }
+        setVideoUrl(videoPath);
         if(isFullScreen()) {
-            ivClose.setVisibility(VISIBLE);
-            playState(isPlaying());
+            //ivClose.setVisibility(VISIBLE);
+            //pbarRate.setVisibility(VISIBLE);
+            //ivPlay.setVisibility(GONE);
+            playerStateInit();
+            displayUi();
+        }else{
+            initState(false);
         }
     }
 
     private void createPlayer(boolean isFull){
         if(playerFrame.getChildCount() == 0) {
             playerFrame.addView(createPlayerView(isFull));
-            if(!isFullScreen()){
-                resize();
-            }
+            resize();
+        }
+        if(isFull){
+            ivBack.setVisibility(VISIBLE);
+            ivFullscreen.setImageResource(R.mipmap.fullscreen_exit);
+        }else{
+            ivBack.setVisibility(GONE);
+            ivFullscreen.setImageResource(R.mipmap.fullscreen_start);
         }
     }
 
-    void createFullScreen(){
+    void setUiFullScreen(){
+        setUiFullScreen(this);
+    }
+
+    void setUiFullScreen(View v){
+        if(v != null) {
+            v.setSystemUiVisibility(
+                    SYSTEM_UI_FLAG_FULLSCREEN
+                    |SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            );
+        }
+    }
+
+    void createFullScreen(boolean isLand){
         Activity ac = (Activity)getContext();
         ViewGroup vg = ac.findViewById(Window.ID_ANDROID_CONTENT);
         View view = vg.findViewById(R.id.video_fullscreen_id);
         if(view == null) {
+            PlayerUtils.hideActionBar(ac);
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
             PlayerLayout frame = new PlayerLayout(ac);
-            frame.setLayoutParams(params);
             frame.setId(R.id.video_fullscreen_id);
+            vg.addView(frame,params);
             frame.createPlayer(true);
-            frame.start(getUrl());
+            frame.start(getVideoUrl(),getThumbUrl());
             view = frame;
-            vg.addView(view);
-            PlayerUtils.hideActionBar(ac);
         }
-        view.setSystemUiVisibility( View.SYSTEM_UI_FLAG_FULLSCREEN );
-        ac.setRequestedOrientation(isLand() ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setUiFullScreen(view);
+        ac.setRequestedOrientation(isLand ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     void destroyFullScreen(){
@@ -346,7 +462,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     public static boolean onBackPressed(Context mc){
         PlayerLayout playerLayout = getFullScreen(mc);
         if(playerLayout!=null && playerLayout.isFullScreen()){
-            playerLayout.controlFullScreen(true);
+            playerLayout.controlFullScreen();
             return true;
         }
         return false;

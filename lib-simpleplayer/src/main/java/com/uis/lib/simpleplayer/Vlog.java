@@ -8,7 +8,11 @@ import android.util.Log;
 
 public class Vlog {
 
-    private static boolean debug = BuildConfig.DEBUG;
+    private static boolean debug = true;//BuildConfig.DEBUG;
+
+    public static void enableDebug(){
+        debug = true;
+    }
 
     public static void disableDebug(){
         debug = false;
@@ -56,6 +60,5 @@ public class Vlog {
         }
         return builder.toString();
     }
-
 
 }

@@ -17,6 +17,14 @@ public class PlayerUtils {
         PlayerControl.createPlayer().pause();
     }
 
+    public static boolean isPlaying(String videoPath){
+        return PlayerControl.createPlayer().isPlaying(videoPath);
+    }
+
+    public static boolean isRelease(){
+        return PlayerControl.createPlayer().isRelease();
+    }
+
     public static void start(){
         PlayerControl.createPlayer().start();
     }
@@ -63,5 +71,11 @@ public class PlayerUtils {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         return networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI;
+    }
+
+    public static boolean isMobileConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE;
     }
 }

@@ -5,6 +5,7 @@ package com.uis.lib.simpleplayer.player;
  */
 
 public interface PlayerComplete {
+    int STATE_PREPARE = 0x04;
     int STATE_START = 0x00;
     int STATE_PAUSE = 0x01;
     int STATE_RELEASE = 0x02;

@@ -2,13 +2,17 @@ package com.uis.lib.simpleplayer.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import com.uis.lib.simpleplayer.Vlog;
 
 /**
  * 播放显示器
@@ -42,8 +46,10 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
     }
 
     private void init(){
-        mPlayer = PlayerControl.createPlayer();
-        setSurfaceTextureListener(this);
+        if(!isInEditMode()) {
+            mPlayer = PlayerControl.createPlayer();
+            setSurfaceTextureListener(this);
+        }
     }
 
     public void setFullScreen(boolean isFull){
@@ -72,6 +78,10 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
         return mPlayer.isPlaying(url);
     }
 
+    public boolean isRelease(){
+        return mPlayer.isRelease();
+    }
+
     public void pause(){
         mPlayer.pause();
     }
@@ -82,16 +92,16 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
         if(w<=0 || h<=0){
             return;
         }
-        int screenW;
-        int screenH;
+        int screenW = 0;
+        int screenH = 0;
+        ViewGroup root = (ViewGroup)getParent();
+        if(root==null){
+            return;
+        }
         if(isFullScreen){
             screenW = getResources().getDisplayMetrics().widthPixels;
             screenH = getResources().getDisplayMetrics().heightPixels;
         }else{
-            ViewGroup root = (ViewGroup)getParent();
-            if(root==null){
-                return;
-            }
             screenW = root.getMeasuredWidthAndState();
             screenH = root.getMeasuredHeightAndState();
         }

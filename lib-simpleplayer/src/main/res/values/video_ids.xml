@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="video_fullscreen_id" type="id"/>
+    <item name="video_container_id" type="id"/>
+    <item name="video_outside_id" type="id"/>
 </resources>

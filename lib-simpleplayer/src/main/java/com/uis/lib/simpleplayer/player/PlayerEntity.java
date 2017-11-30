@@ -9,6 +9,7 @@ final class PlayerEntity {
     public int current = 0;
     public boolean canPrepare = true;
     public boolean canPlay = false;
+    public boolean isPause = false;
 
     public PlayerEntity(String url) {
         this.url = url;

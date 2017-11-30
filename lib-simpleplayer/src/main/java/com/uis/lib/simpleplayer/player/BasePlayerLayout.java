@@ -3,6 +3,7 @@ package com.uis.lib.simpleplayer.player;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -10,6 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import com.uis.lib.simpleplayer.R;
+import com.uis.lib.simpleplayer.Vlog;
 
 /**
  * @author uis on 2017/11/25.
@@ -27,10 +31,13 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     protected int currentTime = 0;
 
     private String mUrl;
+    private String thumbUrl;
     private boolean isFullScreen = false;
     private boolean hasFullscreen = false;
     private boolean isLand = false;
     private PlayerCounter mCounter;
+
+    protected TypedArray mATTR;
 
     public BasePlayerLayout(@NonNull Context context) {
         this(context,null);
@@ -42,20 +49,21 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     public BasePlayerLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mATTR = context.obtainStyledAttributes(attrs, R.styleable.PlayerLayout, defStyleAttr,0);
         innerInit();
     }
 
     @TargetApi(21)
     public BasePlayerLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mATTR = context.obtainStyledAttributes(attrs, R.styleable.PlayerLayout, defStyleAttr,defStyleRes);
         innerInit();
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        if(isFullScreen()) {
-            resize();
-        }
+        super.onConfigurationChanged(newConfig);
+        resize();
     }
 
     @Override
@@ -85,14 +93,14 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         mCounter.startTimer(true,false,sTimerMills,new Runnable() {
             @Override
             public void run() {
-                onCounter();
+                onCounter(false);
             }
         });
     }
 
     protected abstract void init();
 
-    protected void onCounter(){
+    protected void onCounter(boolean userStop){
 
     }
 
@@ -158,6 +166,10 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         return player!=null && player.isPlaying();
     }
 
+    protected boolean isRelease(){
+        return player==null || player.isRelease();
+    }
+
     protected void setFullScreen(boolean isFull){
         isFullScreen = isFull;
         if(player!=null) {
@@ -187,14 +199,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         }
     }
 
-    protected boolean isLand(){
-        return isLand;
-    }
-
-    protected void setLand(boolean isLand){
-        this.isLand = isLand;
-    }
-
     protected boolean hasFullScreen(){
         return hasFullscreen;
     }
@@ -203,11 +207,19 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         this.hasFullscreen = hasFull;
     }
 
-    protected void setUrl(String url){
+    protected void setVideoUrl(String url){
         mUrl = url;
     }
 
-    protected String getUrl(){
+    protected String getVideoUrl(){
         return mUrl;
+    }
+
+    protected void setThumbUrl(String url){
+        thumbUrl = url;
+    }
+
+    protected String getThumbUrl(){
+        return thumbUrl;
     }
 }
