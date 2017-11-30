@@ -42,7 +42,7 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
     }
 
     public static void setPlaying(){
-        isPlaying = PlayerUtils.isPlaying(DemoApp.mUrl[3]);
+        isPlaying = PlayerUtils.isPlaying();
     }
 
     public static boolean isPlaying(){

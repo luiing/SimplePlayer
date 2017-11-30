@@ -27,12 +27,5 @@
             android:layout_alignParentTop="true"
             android:visibility="gone"
             />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="#00ff00"
-            android:layout_marginBottom="10dp"
-            android:layout_alignParentBottom="true"
-            />
     </RelativeLayout>
 </LinearLayout>
