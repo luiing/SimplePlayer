@@ -427,7 +427,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
     void createFullScreen(boolean isLand){
         Activity ac = (Activity)getContext();
-        ViewGroup vg = ac.findViewById(Window.ID_ANDROID_CONTENT);
+        ViewGroup vg = (ViewGroup) ac.findViewById(Window.ID_ANDROID_CONTENT);
         View view = vg.findViewById(R.id.video_fullscreen_id);
         if(view == null) {
             PlayerUtils.hideActionBar(ac);
@@ -446,7 +446,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
     void destroyFullScreen(){
         Activity ac = (Activity)getContext();
-        ViewGroup vg = ac.findViewById(Window.ID_ANDROID_CONTENT);
+        ViewGroup vg = (ViewGroup)ac.findViewById(Window.ID_ANDROID_CONTENT);
         View video = vg.findViewById(R.id.video_fullscreen_id);
         if(video != null) {
             vg.removeView(video);
@@ -471,7 +471,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     static PlayerLayout getFullScreen(Context mc){
         if(mc!=null && mc instanceof Activity) {
             Activity ac = (Activity) mc;
-            ViewGroup vg = ac.findViewById(Window.ID_ANDROID_CONTENT);
+            ViewGroup vg = (ViewGroup)ac.findViewById(Window.ID_ANDROID_CONTENT);
             View video = vg.findViewById(R.id.video_fullscreen_id);
             if(video != null){
                 return (PlayerLayout)video;

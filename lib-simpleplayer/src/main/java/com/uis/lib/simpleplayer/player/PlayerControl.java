@@ -189,6 +189,7 @@ final class PlayerControl implements PlayerListener {
             if(mEntity!=null){
                 mEntity.canPrepare = true;
                 mEntity.canPlay = false;
+                mEntity.isPause = false;
             }
         }
     }
@@ -320,12 +321,12 @@ final class PlayerControl implements PlayerListener {
     public void pause(){
         try {
             Vlog.e("xx","--------pause-----------");
-            if(mEntity != null){
-                mEntity.isPause = true;
-            }
             stopTimer();
             if(mPlayer!=null && isPlaying()) {
                 mPlayer.pause();
+                if(mEntity != null){
+                    mEntity.isPause = true;
+                }
                 onComplete(PlayerComplete.STATE_PAUSE);
             }
         }catch (Exception ex){
