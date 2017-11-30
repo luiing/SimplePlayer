@@ -29,5 +29,6 @@ public interface PlayerListener {
     void onChanged(String key);
 
     boolean isPlaying(String key);
+    boolean isPlaying();
     boolean isRelease();
 }

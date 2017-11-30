@@ -265,7 +265,8 @@ final class PlayerControl implements PlayerListener {
         }
     }
 
-    private boolean isPlaying(){
+    @Override
+    public boolean isPlaying(){
         return mEntity!=null && isPlaying(mEntity.url);
     }
 

@@ -17,6 +17,10 @@ public class PlayerUtils {
         PlayerControl.createPlayer().pause();
     }
 
+    public static boolean isPlaying(){
+        return PlayerControl.createPlayer().isPlaying();
+    }
+
     public static boolean isPlaying(String videoPath){
         return PlayerControl.createPlayer().isPlaying(videoPath);
     }
