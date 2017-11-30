@@ -215,7 +215,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             @Override
             public void onProgress(int current, int total) {
                 if(current>0 && thumb.getVisibility() == VISIBLE){
-                    thumb.setVisibility(GONE);
+                    thumbVisibility(false);
                 }
                 if(totalTime == 0){
                     totalTime = total;
@@ -283,14 +283,13 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
     private void initState(boolean isStart){
         if(isStart){
-            //thumb.setVisibility(GONE);
             ivPlay.setVisibility(GONE);
             ivPause.setVisibility(GONE);
         }else{
             pbarLoading.setVisibility(GONE);
             pbarRate.setVisibility(GONE);
             llRate.setVisibility(GONE);
-            thumb.setVisibility(VISIBLE);
+            thumbVisibility(true);
             checkWifi();
             ivPause.setVisibility(GONE);
         }
@@ -380,6 +379,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         if(!TextUtils.isEmpty(thumbPath)) {
             setThumbUrl(thumbPath);
             thumb.setImageURI(thumbPath);
+            thumbVisibility(true);
         }
         if(TextUtils.isEmpty(videoPath)){
             ivPlay.setVisibility(GONE);
@@ -395,6 +395,14 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             displayUi();
         }else{
             initState(false);
+        }
+    }
+
+    private void thumbVisibility(boolean isVisibility){
+        if(!isFullScreen() && isVisibility){
+            thumb.setVisibility(VISIBLE);
+        }else{
+            thumb.setVisibility(GONE);
         }
     }
 
