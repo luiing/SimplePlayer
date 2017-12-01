@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.e("xx","onResume....");
-        if(VideoPagerAdapter.isPlaying()) {
+        if(ScreenConvertor.isPlaying()) {
             PlayerUtils.start();
         }
     }
@@ -94,13 +94,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         Log.e("xx","onPause....");
-        VideoPagerAdapter.setPlaying();
+        ScreenConvertor.setPlaying();
         PlayerUtils.pause();
     }
 
     @Override
     public void onBackPressed() {
-        if(!VideoPagerAdapter.onBackPressed(this)){
+        if(!ScreenConvertor.onBackPressed(this)){
             super.onBackPressed();
         }
     }
