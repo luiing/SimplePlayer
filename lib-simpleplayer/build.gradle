@@ -3,7 +3,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 def siteUrl = 'https://github.com/luiing/SimplePlayer'
 def gitUrl = 'https://github.com/luiing/SimplePlayer.git'
-version = "0.0.6"
+version = "0.0.7"
 android {
     compileSdkVersion compileVer
     buildToolsVersion buildVer

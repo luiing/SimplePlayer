@@ -102,7 +102,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         ivPause.setOnClickListener(this);
         ivFullscreen.setOnClickListener(this);
         ivBack.setOnClickListener(this);
-        ivClose.setOnClickListener(this);
+        //ivClose.setOnClickListener(this);
         boolean isEdit = isInEditMode();
         llRate.setVisibility(isEdit ? VISIBLE:GONE);
         pbarRate.setVisibility(isEdit ? VISIBLE:GONE);
@@ -486,12 +486,12 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         View video = vg.findViewById(R.id.video_fullscreen_id);
         if(video != null) {
             vg.removeView(video);
-            if(video instanceof PlayerLayout){
-                ((PlayerLayout)video).onChanged();
-            }
             PlayerUtils.showActionBar(ac);
             video.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE );
             ac.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            if(video instanceof PlayerLayout){
+                ((PlayerLayout)video).onChanged();
+            }
         }
     }
 

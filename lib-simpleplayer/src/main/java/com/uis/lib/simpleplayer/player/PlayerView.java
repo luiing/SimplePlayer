@@ -102,9 +102,10 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
             screenW = getResources().getDisplayMetrics().widthPixels;
             screenH = getResources().getDisplayMetrics().heightPixels;
         }else{
-            screenW = root.getMeasuredWidthAndState();
-            screenH = root.getMeasuredHeightAndState();
+            screenW = root.getWidth();
+            screenH = root.getHeight();
         }
+        Vlog.a("xx",isFullScreen+"--------resize-----"+w+","+h+",W="+screenW+",H="+screenH);
         if(getRate(w,h) >= getRate(screenW,screenH)){//fixed width
             h = screenW * h / w;
             w = screenW;

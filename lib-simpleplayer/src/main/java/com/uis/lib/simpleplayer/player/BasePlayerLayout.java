@@ -61,12 +61,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        resize();
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
         stopTimer();
         super.onDetachedFromWindow();
@@ -188,8 +182,15 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     }
 
     protected void resize(){
-        if(player!=null) {
-            player.resize();
+        if(getHandler()!=null){
+            getHandler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(player!=null) {
+                        player.resize();
+                    }
+                }
+            },50);
         }
     }
 
