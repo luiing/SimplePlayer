@@ -272,15 +272,16 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public boolean isPlaying(String key) {
-        Vlog.e("xx","isPlaying....");
+        boolean isPlaying = false;
         try {
             if (mPlayer!=null && mEntity!=null && mEntity.url.equals(key) && mPlayer.isPlaying()) {
-                return true;
+                isPlaying = true;
             }
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return false;
+        Vlog.e(TAG,"------isPlaying----"+isPlaying+",key="+key);
+        return isPlaying;
     }
 
     @Override

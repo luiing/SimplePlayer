@@ -156,15 +156,21 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
             @Override
             public void onComplete(int state) {
-                if(PlayerComplete.STATE_START == state || PlayerComplete.STATE_PAUSE == state){
-
-                }else if(PlayerComplete.STATE_PREPARE == state){
-                    displayUi();
-                }else {
-                    if(PlayerComplete.STATE_RELEASE == state){
+                switch (state){
+                    case PlayerComplete.STATE_START:
+                        setTag(getVideoUrl());
+                        break;
+                    case PlayerComplete.STATE_PAUSE:
+                        break;
+                    case PlayerComplete.STATE_PREPARE:
+                        displayUi();
+                        break;
+                    case PlayerComplete.STATE_RELEASE:
                         isInit = false;
-                    }
-                    initState(false);
+                    case PlayerComplete.STATE_RESET:
+                        setTag(null);
+                        initState(false);
+                        break;
                 }
             }
         };
@@ -243,6 +249,11 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         };
     }
 
+    private void setPlayGone(){
+        ivPlay.setVisibility(GONE);
+        llPlay.setVisibility(GONE);
+    }
+
     private void checkWifi(){
         if(PlayerUtils.isMobileConnected(getContext())){
             llPlay.setVisibility(VISIBLE);
@@ -290,8 +301,20 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             pbarRate.setVisibility(GONE);
             llRate.setVisibility(GONE);
             thumbVisibility(true);
-            checkWifi();
-            ivPause.setVisibility(GONE);
+            boolean isCurrent = false;
+            if(PlayerUtils.isPlaying()){
+                if(PlayerUtils.isPlaying(getVideoUrl())) {//play current videoUrl
+                    isCurrent = true;
+                }else{//play another videoUrl
+                }
+            }
+            if(isCurrent){
+                setPlayGone();
+                ivPause.setVisibility(VISIBLE);
+            }else {
+                checkWifi();
+                ivPause.setVisibility(GONE);
+            }
         }
     }
 
@@ -382,8 +405,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             thumbVisibility(true);
         }
         if(TextUtils.isEmpty(videoPath)){
-            ivPlay.setVisibility(GONE);
-            llPlay.setVisibility(GONE);
+            setPlayGone();
             return;
         }
         setVideoUrl(videoPath);
@@ -403,6 +425,12 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             thumb.setVisibility(VISIBLE);
         }else{
             thumb.setVisibility(GONE);
+        }
+    }
+
+    private void removePlayer(){
+        if(!isFullScreen()){
+            createPlayerView(false);
         }
     }
 
