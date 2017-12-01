@@ -2,12 +2,10 @@ package com.video.demo;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -44,7 +42,13 @@ public class MainActivity extends AppCompatActivity {
             LinearLayoutManager layoutManager = new LinearLayoutManager(this);
             recyclerView.setLayoutManager(layoutManager);
             VideoAdapter adapter = new VideoAdapter();
-            adapter.setData(new String[]{"",DemoApp.mUrl[6]});
+            int size = DemoApp.mUrl.length;
+            String[] data = new String[1*size+1];
+            data[0] = "";
+            for(int i = 1,t = 1*size+1;i<t;i++){
+                data[i] = DemoApp.mUrl[i%size];
+            }
+            adapter.setData(data);
             recyclerView.setAdapter(adapter);
         }else{
             playerLayout.start(DemoApp.mUrl[2],"");
@@ -70,12 +74,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        Vlog.e("xx","----onConfigurationChanged---");
-    }
-
-    @Override
     protected void onDestroy() {
         PlayerUtils.release();
         super.onDestroy();
@@ -84,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("xx","onResume....");
         if(ScreenConvertor.isPlaying()) {
             PlayerUtils.start();
         }
@@ -93,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("xx","onPause....");
         ScreenConvertor.setPlaying();
         PlayerUtils.pause();
     }

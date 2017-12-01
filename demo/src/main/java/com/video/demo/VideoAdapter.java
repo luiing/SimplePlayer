@@ -1,17 +1,13 @@
 package com.video.demo;
 
-import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.uis.lib.simpleplayer.Vlog;
-import com.uis.lib.simpleplayer.player.PlayerUtils;
 import com.uis.lib.simpleplayer.PlayerLayout;
 
 /**
@@ -74,23 +70,27 @@ public class VideoAdapter extends RecyclerView.Adapter {
 
     static class VpVH extends RecyclerView.ViewHolder{
         ViewPager viewPager;
+        VideoPagerAdapter adapter;
 
         public VpVH(View itemView) {
             super(itemView);
-            final Context mc = itemView.getContext();
             this.viewPager = id(itemView,R.id.viewpager);
         }
 
         public void onViewBind(){
-            final VideoPagerAdapter adapter = new VideoPagerAdapter();
-            viewPager.setOffscreenPageLimit(7);
-            viewPager.addOnPageChangeListener(adapter);
-            viewPager.setAdapter(adapter);
+            Vlog.e("xx","onViewBind...");
+            if(adapter == null) {
+                adapter = new VideoPagerAdapter();
+                viewPager.setOffscreenPageLimit(7);
+                viewPager.addOnPageChangeListener(adapter);
+                viewPager.setAdapter(adapter);
+            }
         }
     }
 
     static class VideoVH extends RecyclerView.ViewHolder{
         PlayerLayout player;
+        String videoUrl;
 
         public VideoVH(View itemView) {
             super(itemView);
@@ -98,12 +98,12 @@ public class VideoAdapter extends RecyclerView.Adapter {
         }
 
         public void onViewRecycled(){
-            Log.e("xx","onViewRecycled...");
+            Vlog.e("xx","onViewRecycled...");
         }
 
         public void onViewBind(String url){
+            Vlog.e("xx","onViewBind...");
             player.start(url,DemoApp.URL);
-            Log.e("xx","onViewBind...");
         }
     }
 

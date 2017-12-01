@@ -41,7 +41,7 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
     @Override
     public Object instantiateItem(ViewGroup container, final int position) {
         View v;
-        if(position>=0) {
+        if(position>0) {
             if (mList.size() > 0) {
                 v = mList.pop();
             }else {
@@ -62,7 +62,7 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
                 mVideo = new PlayerLayout(container.getContext());
                 ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(-1, WIDTH);
                 mVideo.setLayoutParams(params);
-                String url = DemoApp.mUrl[3];
+                String url = "http://img.iblimg.com/goods-135/feng.mp4";
                 mVideo.start(position >= 0 ? url : "", DemoApp.URL);
                 mVideo.setOnScreenListener(new OnScreenListener() {
                     @Override

@@ -26,6 +26,6 @@ public class DemoApp extends Application {
             "https://vdse.bdstatic.com//6a90cf9678713ea594a428a8c98d2b5f.mp4?authorization=bce-auth-v1%2Ffb297a5cc0fb434c971b8fa103e8dd7b%2F2017-05-11T09%3A02%3A31Z%2F-1%2F%2F385d02679b636d6e5dd150193a497b787d517afef0f6c0903350a85056408e59",
             "http://data.vod.itc.cn/?rb=1&prot=1&key=jbZhEJhlqlUN-Wj_HEI8BjaVqKNFvDrn&prod=flash&pt=1&new=/20/111/bOT648IiIIVJPS33wZpYWH.mp4",
             "http://jzvd.nathen.cn/6ea7357bc3fa4658b29b7933ba575008/fbbba953374248eb913cb1408dc61d85-5287d2089db37e62345123a1be272f8b.mp4",
-            "http://img.iblimg.com/goods-135/feng.mp4",
+            "http://img.iblimg.com/goods-135/feng.mp4"
     };
 }
