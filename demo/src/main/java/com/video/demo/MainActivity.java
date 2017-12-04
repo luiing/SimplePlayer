@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             String[] data = new String[1*size+1];
             data[0] = "";
             for(int i = 1,t = 1*size+1;i<t;i++){
-                data[i] = DemoApp.mUrl[i%size];
+                data[i] = DemoApp.mUrl[(i-1)%size];
             }
             adapter.setData(data);
             recyclerView.setAdapter(adapter);
