@@ -10,7 +10,7 @@ import com.uis.lib.simpleplayer.Vlog;
 
 /**
  * MediaPlayer播放器
- * @author uis on 2017/11/20,Modify 2017/11/25
+ * @author uis on 2017/11/25
  */
 
 final class PlayerControl implements PlayerListener {

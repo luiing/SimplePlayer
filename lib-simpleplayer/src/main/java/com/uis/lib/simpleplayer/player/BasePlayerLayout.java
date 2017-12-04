@@ -2,7 +2,6 @@ package com.uis.lib.simpleplayer.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,7 +33,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     private String thumbUrl;
     private boolean isFullScreen = false;
     private boolean hasFullscreen = false;
-    private boolean isLand = false;
     private PlayerCounter mCounter;
 
     protected TypedArray mATTR;

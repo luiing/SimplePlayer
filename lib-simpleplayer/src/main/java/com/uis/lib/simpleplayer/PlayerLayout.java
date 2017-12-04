@@ -53,6 +53,8 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     private boolean isSeeking = false;
     private boolean isVideoLand;
     private OnScreenListener onScreenListener;
+    private int percentTime;
+    private static final int MAX_PERCENT = 980;
 
     public PlayerLayout(@NonNull Context context) {
         this(context,null);
@@ -169,6 +171,8 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                         isInit = false;
                     case PlayerComplete.STATE_RESET:
                         setTag(null);
+                        percentTime = 0;
+                        totalTime = 0;
                         initState(false);
                         break;
                 }
@@ -189,11 +193,11 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                 if(percent>98) {
                     percent = 98;
                 }
-                percent *= 10;
+                percentTime = 10*percent;
                 int pb = pbarRate.getSecondaryProgress();
-                if(percent > pb) {
-                    pbarRate.setSecondaryProgress(percent);
-                    sbarRate.setSecondaryProgress(percent);
+                if(percentTime > pb) {
+                    pbarRate.setSecondaryProgress(percentTime);
+                    sbarRate.setSecondaryProgress(percentTime);
                 }
             }
 
@@ -239,6 +243,10 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                     tvPlayTime.setText(getTime(current));
                 }
                 tvTotalTime.setText(getTime(total));
+                if(isFullScreen() && percentTime == MAX_PERCENT){
+                    pbarRate.setSecondaryProgress(percentTime);
+                    sbarRate.setSecondaryProgress(percentTime);
+                }
             }
 
             @Override
@@ -410,9 +418,6 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         }
         setVideoUrl(videoPath);
         if(isFullScreen()) {
-            //ivClose.setVisibility(VISIBLE);
-            //pbarRate.setVisibility(VISIBLE);
-            //ivPlay.setVisibility(GONE);
             playerStateInit();
             displayUi();
         }else{
@@ -473,6 +478,8 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             frame.setId(R.id.video_fullscreen_id);
             vg.addView(frame,params);
             frame.createPlayer(true);
+            frame.totalTime = totalTime;
+            frame.percentTime = percentTime;
             frame.start(getVideoUrl(),getThumbUrl());
             view = frame;
         }
