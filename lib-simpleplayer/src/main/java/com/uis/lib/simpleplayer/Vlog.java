@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class Vlog {
 
-    private static boolean debug = true;//BuildConfig.DEBUG;
+    private static boolean debug = false;
 
     public static void enableDebug(){
         debug = true;

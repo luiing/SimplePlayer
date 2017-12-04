@@ -67,7 +67,7 @@ final class PlayerControl implements PlayerListener {
         mPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                Vlog.e("xx","------onPrepared------");
+                Vlog.e(TAG,"------onPrepared------");
                 if(mCallback != null){
                     mCallback.onPrepared(mVideoPlayer);
                 }
@@ -162,7 +162,7 @@ final class PlayerControl implements PlayerListener {
     }
 
     private void prepare(){
-        Vlog.e("xx","-------prepare---------");
+        Vlog.e(TAG,"-------prepare---------");
         try {
             if(mEntity != null) {
                 mPlayer.setDataSource(mEntity.url);
@@ -176,7 +176,7 @@ final class PlayerControl implements PlayerListener {
 
     private void reset(){
         try{
-            Vlog.e("xx","--------reset-----------");
+            Vlog.e(TAG,"--------reset-----------");
             stopTimer();
             if(mPlayer!=null){
                 mPlayer.reset();
@@ -197,7 +197,7 @@ final class PlayerControl implements PlayerListener {
     @Override
     public void release(){
         try {
-            Vlog.e("xx","--------release-----------");
+            Vlog.e(TAG,"--------release-----------");
             stopTimer();
             if(mPlayer!=null) {
                 mPlayer.release();
@@ -248,7 +248,7 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public void prepare(String key) {
-        Vlog.e("xx","----prepare---mEntity is null = "+(mEntity==null));
+        Vlog.e(TAG,"----prepare---mEntity is null = "+(mEntity==null));
         if(mEntity!=null && !mEntity.url.equals(key)){
             release();
         }
@@ -293,7 +293,7 @@ final class PlayerControl implements PlayerListener {
     @Override
     public void start(){
         try{
-            Vlog.e("xx","--------start-----------"+isPlaying());
+            Vlog.e(TAG,"--------start-----------"+isPlaying());
             if(mPlayer!=null && !isPlaying() && mEntity!=null && mEntity.canPlay) {
                 mPlayer.start();
                 startTimer();
@@ -310,7 +310,7 @@ final class PlayerControl implements PlayerListener {
     @Override
     public void seekTo(int millsec) {
         try {
-            Vlog.e("xx","-----------seek----------"+millsec);
+            Vlog.e(TAG,"-----------seek----------"+millsec);
             if(mEntity!=null && mEntity.canPlay) {
                 mPlayer.seekTo(millsec);
             }
@@ -322,7 +322,7 @@ final class PlayerControl implements PlayerListener {
     @Override
     public void pause(){
         try {
-            Vlog.e("xx","--------pause-----------");
+            Vlog.e(TAG,"--------pause-----------");
             stopTimer();
             if(mPlayer!=null && isPlaying()) {
                 mPlayer.pause();

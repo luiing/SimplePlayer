@@ -21,6 +21,7 @@ import com.uis.lib.simpleplayer.Vlog;
 
 final class PlayerView extends TextureView implements TextureView.SurfaceTextureListener{
 
+    private final static String TAG = "PlayerView";
     protected PlayerListener mPlayer;
     private SurfaceTexture savedSurface;
     private boolean isFullScreen = false;
@@ -105,7 +106,7 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
             screenW = root.getWidth();
             screenH = root.getHeight();
         }
-        Vlog.a("xx",isFullScreen+"--------resize-----"+w+","+h+",W="+screenW+",H="+screenH);
+        Vlog.a(TAG,isFullScreen+"--------resize-----"+w+","+h+",W="+screenW+",H="+screenH);
         if(getRate(w,h) >= getRate(screenW,screenH)){//fixed width
             h = screenW * h / w;
             w = screenW;

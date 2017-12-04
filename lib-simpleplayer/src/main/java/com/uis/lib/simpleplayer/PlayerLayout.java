@@ -203,7 +203,6 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
             @Override
             public void onCompletion(PlayerListener vp) {
-                Vlog.e("xx","isFull="+isFullScreen());
                 if(isFullScreen()) {
                     controlFullScreen();
                 }
