@@ -21,7 +21,7 @@ import com.uis.lib.simpleplayer.Vlog;
 public abstract class BasePlayerLayout extends RelativeLayout {
 
     public final static int MaxRate = 1000;
-    public static int sTimerMills = 5000;
+    public static int sTimerMills = 3500;
     protected static PlayerView sPlayer;
     protected PlayerView player;
     protected PlayerComplete mComplete;
@@ -34,6 +34,7 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     private boolean isFullScreen = false;
     private boolean hasFullscreen = false;
     private PlayerCounter mCounter;
+    private long resizeTime = 0;
 
     protected TypedArray mATTR;
 
@@ -56,12 +57,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
         mATTR = context.obtainStyledAttributes(attrs, R.styleable.PlayerLayout, defStyleAttr,defStyleRes);
         innerInit();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        stopTimer();
-        super.onDetachedFromWindow();
     }
 
     private void innerInit(){
@@ -154,11 +149,11 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         }
     }
 
-    protected boolean isPlaying(){
+    public boolean isPlaying(){
         return player!=null && player.isPlaying();
     }
 
-    protected boolean isRelease(){
+    public boolean isRelease(){
         return player==null || player.isRelease();
     }
 
@@ -166,10 +161,11 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         isFullScreen = isFull;
         if(player!=null) {
             player.setFullScreen(isFull);
+            resize();
         }
     }
 
-    protected boolean isFullScreen(){
+    public boolean isFullScreen(){
         return isFullScreen;
     }
 
@@ -181,14 +177,17 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     protected void resize(){
         if(getHandler()!=null){
-            getHandler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if(player!=null) {
-                        player.resize();
+            if(System.currentTimeMillis() - resizeTime > 100) {
+                resizeTime = System.currentTimeMillis();
+                getHandler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (player != null) {
+                            player.resize();
+                        }
                     }
-                }
-            },50);
+                }, 50);
+            }
         }
     }
 

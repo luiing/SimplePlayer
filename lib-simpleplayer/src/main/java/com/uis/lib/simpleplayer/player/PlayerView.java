@@ -2,6 +2,7 @@ package com.uis.lib.simpleplayer.player;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
@@ -46,6 +47,12 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
         init();
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        resize();
+    }
+
     private void init(){
         if(!isInEditMode()) {
             mPlayer = PlayerControl.createPlayer();
@@ -55,7 +62,6 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
 
     public void setFullScreen(boolean isFull){
         isFullScreen = isFull;
-        resize();
     }
 
     public void setDataSource(String key, PlayerCallback callback, PlayerComplete complete){

@@ -3,7 +3,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 def siteUrl = 'https://github.com/luiing/SimplePlayer'
 def gitUrl = 'https://github.com/luiing/SimplePlayer.git'
-version = "0.0.8"
+version = "0.1.5"
 android {
     compileSdkVersion compileVer
     buildToolsVersion buildVer
@@ -94,8 +94,6 @@ group = properties.getProperty("bintray.group")
 def bid = properties.getProperty("bintray.id")
 def bname = properties.getProperty("bintray.name")
 def blib = properties.getProperty("bintray.lib")
-def bemail = properties.getProperty("bintray.email")
-
 bintray {
     user = bname
     key = properties.getProperty("bintray.apikey")

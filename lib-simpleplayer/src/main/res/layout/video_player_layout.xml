@@ -15,7 +15,7 @@
         android:layout_height="360dp"
         android:layout_gravity="center"
         app:actualImageScaleType="focusCrop"
-        app:placeholderImageScaleType="fitCenter"
+        app:placeholderImageScaleType="centerInside"
         />
     <ImageView android:id="@+id/player_id_iv_back"
         android:layout_width="30dp"

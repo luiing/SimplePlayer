@@ -168,6 +168,7 @@ final class PlayerControl implements PlayerListener {
                 mPlayer.setDataSource(mEntity.url);
                 mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mPlayer.prepareAsync();
+                onComplete(PlayerComplete.STATE_PREPARING);
             }
         }catch (Exception ex){
             ex.printStackTrace();
@@ -286,7 +287,7 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public boolean isRelease() {
-        onProgress(getCurrentPosition()+1);
+        //onProgress(getCurrentPosition()+1);
         return (mPlayer!=null && mEntity == null) || mPlayer==null || mCallback==null;
     }
 

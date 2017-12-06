@@ -5,11 +5,14 @@ package com.uis.lib.simpleplayer.player;
  */
 
 public interface PlayerComplete {
-    int STATE_PREPARE = 0x04;
+
     int STATE_START = 0x00;
     int STATE_PAUSE = 0x01;
     int STATE_RELEASE = 0x02;
     int STATE_RESET = 0x03;
+    int STATE_PREPARE = 0x04;
+    int STATE_PREPARING = 0x05;
+
     void onChanged();
     void onComplete(int state);
 }

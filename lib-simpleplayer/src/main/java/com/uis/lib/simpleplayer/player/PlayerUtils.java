@@ -6,6 +6,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.widget.Toast;
 
 /**
  * @author uis on 2017/11/21.
@@ -62,6 +64,12 @@ public class PlayerUtils {
                     abar.hide();
                 }
             }
+        }
+    }
+
+    public static void toast(Context context,String msg){
+        if(context!=null && !TextUtils.isEmpty(msg)) {
+            Toast.makeText(context, msg,Toast.LENGTH_SHORT).show();
         }
     }
 

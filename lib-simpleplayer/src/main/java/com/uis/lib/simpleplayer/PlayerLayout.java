@@ -2,9 +2,14 @@ package com.uis.lib.simpleplayer;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -20,6 +25,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.drawee.drawable.ScalingUtils;
+import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.uis.lib.simpleplayer.player.BasePlayerLayout;
 import com.uis.lib.simpleplayer.player.PlayerCallback;
@@ -33,6 +40,7 @@ import com.uis.lib.simpleplayer.player.PlayerUtils;
  */
 
 public class PlayerLayout extends BasePlayerLayout implements View.OnClickListener{
+    private final static String TAG = "PlayerLayout";
     private FrameLayout frameLayout;
     private FrameLayout playerFrame;
     private SimpleDraweeView thumb;
@@ -53,8 +61,10 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     private boolean isSeeking = false;
     private boolean isVideoLand;
     private OnScreenListener onScreenListener;
+    private PlayerStateCallback stateCallback;
     private int percentTime;
     private static final int MAX_PERCENT = 980;
+    private NetChangeReceiver mReceiver;
 
     public PlayerLayout(@NonNull Context context) {
         this(context,null);
@@ -71,6 +81,73 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     @TargetApi(21)
     public PlayerLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    interface OnNetChanged{
+        void onChanged();
+    }
+
+    static class NetChangeReceiver extends BroadcastReceiver {
+        OnNetChanged mOnNetChanged;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+
+            } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
+
+            } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+
+            }else{
+                return;
+            }
+            if(mOnNetChanged != null){
+                mOnNetChanged.onChanged();
+            }
+        }
+
+        public void setOnNetChanged(OnNetChanged changed){
+            mOnNetChanged = changed;
+        }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        registerNetChanged();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        unregisterNetChanged();
+    }
+
+    private void registerNetChanged(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        if(mReceiver == null){
+            mReceiver = new NetChangeReceiver();
+            mReceiver.setOnNetChanged(new OnNetChanged() {
+                @Override
+                public void onChanged() {
+                    if(isRelease() && !isLoading()){
+                        checkWifi();
+                    }
+                }
+            });
+        }
+        if(mReceiver != null && getContext()!=null) {
+            getContext().registerReceiver(mReceiver, filter);
+        }
+    }
+
+    private void unregisterNetChanged(){
+        if(mReceiver != null && getContext()!=null) {
+            getContext().unregisterReceiver(mReceiver);
+        }
     }
 
     @Override
@@ -110,6 +187,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         pbarRate.setVisibility(isEdit ? VISIBLE:GONE);
         ivPlay.setVisibility(isEdit ? VISIBLE:GONE);
         llPlay.setVisibility(isEdit ? VISIBLE:GONE);
+        setPlaceHolderBackground(Color.WHITE);
         setOnSystemUiVisibilityChangeListener(new OnSystemUiVisibilityChangeListener() {
             @Override
             public void onSystemUiVisibilityChange(int visibility) {
@@ -167,6 +245,10 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                     case PlayerComplete.STATE_PREPARE:
                         displayUi();
                         break;
+                    case PlayerComplete.STATE_PREPARING:
+                        initState(true);
+                        showLoading();
+                        break;
                     case PlayerComplete.STATE_RELEASE:
                         isInit = false;
                     case PlayerComplete.STATE_RESET:
@@ -175,6 +257,9 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                         totalTime = 0;
                         initState(false);
                         break;
+                }
+                if(stateCallback != null){
+                    stateCallback.onState(state);
                 }
             }
         };
@@ -207,13 +292,14 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                     controlFullScreen();
                 }
                 initState(false);
+                if(stateCallback != null){
+                    stateCallback.onCompletion();
+                }
             }
 
             @Override
             public void onError(PlayerListener vp, int what, int extra) {
-                if(getContext()!=null) {
-                    Toast.makeText(getContext(), "视频播放失败，请检查网络", Toast.LENGTH_SHORT).show();
-                }
+                PlayerUtils.toast(getContext(), "视频播放失败，请检查网络");
             }
 
             @Override
@@ -262,7 +348,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
     }
 
     private void checkWifi(){
-        if(PlayerUtils.isMobileConnected(getContext())){
+        if(!PlayerUtils.isWifiConnected(getContext())){
             llPlay.setVisibility(VISIBLE);
             ivPlay.setVisibility(GONE);
         }else{
@@ -273,6 +359,10 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
 
     public void setOnScreenListener(OnScreenListener onScreenListener) {
         this.onScreenListener = onScreenListener;
+    }
+
+    public void setPlayerStateCallback(PlayerStateCallback callback){
+        this.stateCallback = callback;
     }
 
     @Override
@@ -289,20 +379,26 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                 controlFullScreen();
             }
         }else if(id == R.id.player_id_iv_play || id == R.id.player_id_iv_play_s){
-            if(isRelease()){
-                initState(true);
-                showLoading();
+            if(!PlayerUtils.isConnected(getContext()) && isRelease() && !isVideoFile()) {
+                PlayerUtils.toast(getContext(), "当前无网络连接");
+            }else{
+                playState();
             }
-            playState();
         }else if(id == R.id.player_id_iv_pause){
             playState();
         }
+    }
+
+    private boolean isVideoFile(){
+        String path = getVideoUrl();
+        return !TextUtils.isEmpty(path)&&path.startsWith("/");
     }
 
     private void initState(boolean isStart){
         if(isStart){
             ivPlay.setVisibility(GONE);
             ivPause.setVisibility(GONE);
+            llPlay.setVisibility(GONE);
         }else{
             pbarLoading.setVisibility(GONE);
             pbarRate.setVisibility(GONE);
@@ -330,8 +426,14 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         if(!isPlaying()){
             prepare();
             isInit = true;
+            if(stateCallback != null){
+                stateCallback.onPlay(isRelease());
+            }
         }else{
             pause();
+            if(stateCallback != null){
+                stateCallback.onPause();
+            }
         }
         playerStateUi();
     }
@@ -361,6 +463,10 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             setHasFullScreen(true);
             createFullScreen(isVideoLand);
         }
+    }
+
+    private boolean isLoading(){
+        return pbarLoading!=null && VISIBLE == pbarLoading.getVisibility();
     }
 
     private void showLoading(){
@@ -402,6 +508,23 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             if(isFullScreen()){
                 ivBack.setVisibility(VISIBLE);
             }
+        }
+    }
+
+    public void setPlaceHolderBackground(int color){
+        if(thumb != null){
+            thumb.setBackgroundColor(color);
+        }
+    }
+
+    public void setPlaceHolderImage(int resourceId){
+        this.setPlaceHolderImage(resourceId,ScalingUtils.ScaleType.CENTER_INSIDE);
+    }
+
+    public void setPlaceHolderImage(int resourceId,ScalingUtils.ScaleType scaleType){
+        if(thumb!=null){
+            GenericDraweeHierarchy gdh = thumb.getHierarchy();
+            gdh.setPlaceholderImage(resourceId, scaleType);
         }
     }
 
@@ -484,6 +607,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         }
         setUiFullScreen(view);
         ac.setRequestedOrientation(isLand ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        Vlog.e(TAG,"---create----");
     }
 
     void destroyFullScreen(){
@@ -499,6 +623,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                 ((PlayerLayout)video).onChanged();
             }
         }
+        Vlog.e(TAG,"---destroy----");
     }
 
     public static boolean onBackPressed(Context mc){
