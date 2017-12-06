@@ -27,5 +27,11 @@
             android:layout_alignParentTop="true"
             android:visibility="gone"
             />
+        <View android:id="@+id/v_state"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="#ff0000"
+            android:layout_alignParentBottom="true"
+            />
     </RelativeLayout>
 </LinearLayout>

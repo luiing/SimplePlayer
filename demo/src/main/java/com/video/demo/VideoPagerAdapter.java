@@ -11,7 +11,9 @@ import android.view.Window;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.uis.lib.simpleplayer.OnScreenListener;
 import com.uis.lib.simpleplayer.PlayerLayout;
+import com.uis.lib.simpleplayer.PlayerStateCallback;
 import com.uis.lib.simpleplayer.Vlog;
+import com.uis.lib.simpleplayer.player.PlayerComplete;
 import com.uis.lib.simpleplayer.player.PlayerUtils;
 
 import java.util.LinkedList;
@@ -30,6 +32,8 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
     private int currentPos;
     private  boolean canVisibility;
     private View ivClose;
+    private View vState;
+
 
     public VideoPagerAdapter() {
         canVisibility = false;
@@ -60,9 +64,22 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
         }else{
             if(mVideo == null) {
                 mVideo = new PlayerLayout(container.getContext());
+                mVideo.setPlayerStateCallback(new PlayerStateCallback() {
+                    @Override
+                    public void onState(int state) {
+                        //Vlog.a("xx","state = " + state);
+                        if(state == PlayerComplete.STATE_START){
+                            vState.setVisibility(View.GONE);
+                        }else if(state == PlayerComplete.STATE_RESET || state == PlayerComplete.STATE_RELEASE){
+                            if(!canVisibility) {
+                                vState.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                });
                 ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(-1, WIDTH);
                 mVideo.setLayoutParams(params);
-                String url = "http://img.iblimg.com/goods-135/feng.mp4";
+                String url = DemoApp.mUrl[2]+"&p100";
                 mVideo.start(position >= 0 ? url : "", DemoApp.URL);
                 mVideo.setOnScreenListener(new OnScreenListener() {
                     @Override
@@ -80,6 +97,7 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
                         ScreenConvertor.destroyFullScreen(mVideo.getContext());
                     }
                 });
+                vState = cv.findViewById(R.id.v_state);
             }
             v = mVideo;
         }

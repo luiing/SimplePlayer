@@ -3,6 +3,7 @@ package com.video.demo;
 import android.app.Application;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.uis.lib.simpleplayer.Vlog;
 
 //import com.facebook.drawee.backends.pipeline.Fresco;
 
@@ -14,7 +15,12 @@ public class DemoApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Vlog.enableDebug();
         Fresco.initialize(this);
+        /**
+         *  /goods/queryGoodsBasicInfo.htm
+            {"goodsSid":"158608","channelSid":"1","specCodes":["10010"]}
+         */
     }
 
     public final static String URL = "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1511769786707&di=a903cd0bc48d1ba8c5da5e530708ab61&imgtype=0&src=http%3A%2F%2Fa.hiphotos.baidu.com%2Fimage%2Fpic%2Fitem%2F58ee3d6d55fbb2fbbb8058d8464a20a44723dc55.jpg";
