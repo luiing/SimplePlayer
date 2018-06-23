@@ -3,13 +3,11 @@ package com.uis.lib.simpleplayer.player;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -27,6 +25,9 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
     private SurfaceTexture savedSurface;
     private boolean isFullScreen = false;
     private String url;
+    private static int sWidth;
+    private static int sHeight;
+    private static long sResizeTime;
 
     public PlayerView(Context context) {
         this(context,null);
@@ -49,8 +50,9 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        resize();
+        if(isFullScreen) {
+            resize(newConfig.orientation);
+        }
     }
 
     private void init(){
@@ -58,6 +60,8 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
             mPlayer = PlayerControl.createPlayer();
             setSurfaceTextureListener(this);
         }
+        sWidth = getResources().getDisplayMetrics().widthPixels;
+        sHeight = getResources().getDisplayMetrics().heightPixels;
     }
 
     public void setFullScreen(boolean isFull){
@@ -94,25 +98,35 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
     }
 
     void resize(){
+        resize(1);
+    }
+
+    void resize(int config){
+        if(System.currentTimeMillis() - sResizeTime < 100){
+            return;
+        }
         int w = mPlayer.getVideoWidth();
         int h = mPlayer.getVideoHeight();
         if(w<=0 || h<=0){
             return;
         }
-        int screenW = 0;
-        int screenH = 0;
+        int screenW,screenH;
         ViewGroup root = (ViewGroup)getParent();
         if(root==null){
             return;
         }
         if(isFullScreen){
-            screenW = getResources().getDisplayMetrics().widthPixels;
-            screenH = getResources().getDisplayMetrics().heightPixels;
+            if(Configuration.ORIENTATION_LANDSCAPE == config){
+                screenW = sHeight;
+                screenH = sWidth;
+            }else{
+                screenW = sWidth;
+                screenH = sHeight;
+            }
         }else{
             screenW = root.getWidth();
             screenH = root.getHeight();
         }
-        Vlog.a(TAG,isFullScreen+"--------resize-----"+w+","+h+",W="+screenW+",H="+screenH);
         if(getRate(w,h) >= getRate(screenW,screenH)){//fixed width
             h = screenW * h / w;
             w = screenW;
@@ -128,6 +142,7 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
                 ((FrameLayout.LayoutParams) mParams).gravity = Gravity.CENTER;
             }
             setLayoutParams(mParams);
+            sResizeTime = System.currentTimeMillis();
         }
     }
 

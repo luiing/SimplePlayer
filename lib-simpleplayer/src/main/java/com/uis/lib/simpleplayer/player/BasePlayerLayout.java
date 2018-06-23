@@ -12,7 +12,6 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.uis.lib.simpleplayer.R;
-import com.uis.lib.simpleplayer.Vlog;
 
 /**
  * @author uis on 2017/11/25.
@@ -34,7 +33,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     private boolean isFullScreen = false;
     private boolean hasFullscreen = false;
     private PlayerCounter mCounter;
-    private long resizeTime = 0;
 
     protected TypedArray mATTR;
 
@@ -61,15 +59,19 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     private void innerInit(){
         mCounter = PlayerCounter.createCounter();
+        initPlayer(getContext());
+        init();
+    }
+
+    static void initPlayer(Context mc){
         if(sPlayer == null) {
-            sPlayer = new PlayerView(getContext());
+            sPlayer = new PlayerView(mc);
             sPlayer.setLayoutParams(
                     new FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             FrameLayout.LayoutParams.MATCH_PARENT
                     ));
         }
-        init();
     }
 
     protected void stopTimer(){
@@ -93,11 +95,12 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     protected PlayerView createPlayerView(boolean isFull){
         if(player == null){
+            initPlayer(getContext());
             player = sPlayer;
         }
         setFullScreen(isFull);
-        if(sPlayer.getParent()!=null && sPlayer.getParent() instanceof ViewGroup){
-            ViewGroup vg = (ViewGroup)sPlayer.getParent();
+        if(player != null && player.getParent()!=null && player.getParent() instanceof ViewGroup){
+            ViewGroup vg = (ViewGroup)player.getParent();
             vg.removeView(player);
         }
         return player;
@@ -105,6 +108,10 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     public <T extends View> T id(int resId){
         return (T)findViewById(resId);
+    }
+
+    static void releasePlayer(){
+        sPlayer = null;
     }
 
     public static double getRate(int maxRate,int current,int total){
@@ -161,7 +168,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
         isFullScreen = isFull;
         if(player!=null) {
             player.setFullScreen(isFull);
-            resize();
         }
     }
 
@@ -177,17 +183,14 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     protected void resize(){
         if(getHandler()!=null){
-            if(System.currentTimeMillis() - resizeTime > 100) {
-                resizeTime = System.currentTimeMillis();
-                getHandler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (player != null) {
-                            player.resize();
-                        }
+            getHandler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (player != null) {
+                        player.resize();
                     }
-                }, 50);
-            }
+                }
+            },32);
         }
     }
 

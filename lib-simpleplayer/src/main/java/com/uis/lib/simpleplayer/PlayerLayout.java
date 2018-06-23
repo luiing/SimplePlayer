@@ -23,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
@@ -607,7 +606,6 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
         }
         setUiFullScreen(view);
         ac.setRequestedOrientation(isLand ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        Vlog.e(TAG,"---create----");
     }
 
     void destroyFullScreen(){
@@ -623,7 +621,6 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                 ((PlayerLayout)video).onChanged();
             }
         }
-        Vlog.e(TAG,"---destroy----");
     }
 
     public static boolean onBackPressed(Context mc){
