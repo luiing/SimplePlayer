@@ -1,6 +1,7 @@
 package com.uis.lib.simpleplayer.player;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
@@ -25,8 +26,9 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
     private SurfaceTexture savedSurface;
     private boolean isFullScreen = false;
     private String url;
-    private static int sWidth;
-    private static int sHeight;
+    private String key;
+    private static int sWidth = PlayerUtils.getPlayerWidth();
+    private static int sHeight = PlayerUtils.getPlayerHeight();
     private static long sResizeTime;
 
     public PlayerView(Context context) {
@@ -60,21 +62,20 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
             mPlayer = PlayerControl.createPlayer();
             setSurfaceTextureListener(this);
         }
-        sWidth = getResources().getDisplayMetrics().widthPixels;
-        sHeight = getResources().getDisplayMetrics().heightPixels;
     }
 
     public void setFullScreen(boolean isFull){
         isFullScreen = isFull;
     }
 
-    public void setDataSource(String key, PlayerCallback callback, PlayerComplete complete){
-        url = key;
+    public void setDataSource(int unique,String url, PlayerCallback callback, PlayerComplete complete){
+        this.url = url;
+        this.key = PlayerUtils.getUniqueCode(unique,url);
         mPlayer.registerPlayer(key,callback,complete);
     }
 
     public void prepare(){
-        mPlayer.prepare(url);
+        mPlayer.prepare(key,url);
     }
 
     public void seekTo(int time){
@@ -134,6 +135,7 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
             w = screenH * w / h;
             h = screenH;
         }
+        Vlog.e(TAG,"screenW="+screenW+",screenH="+screenH+",w="+w+",h="+h);
         ViewGroup.LayoutParams mParams = getLayoutParams();
         if(mParams.width!=w || mParams.height!=h) {
             mParams.width = w;
@@ -148,7 +150,7 @@ final class PlayerView extends TextureView implements TextureView.SurfaceTexture
 
     void onChanged(){
         if(isFullScreen && mPlayer!=null) {
-            mPlayer.onChanged(url);
+            mPlayer.onChanged(key);
         }
     }
 

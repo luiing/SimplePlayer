@@ -45,14 +45,21 @@ final class PlayerControl implements PlayerListener {
     }
 
     private void startTimer(){
-        mCounter.startTimer(sTimerMills,new Runnable() {
-            @Override
-            public void run() {
-                if(mPlayer!=null) {
-                    onProgress(getCurrentPosition());
-                }
+        mCounter.startTimer(sTimerMills,new InnerCount(this));
+    }
+
+    static class InnerCount implements Runnable{
+        PlayerControl control;
+        public InnerCount(PlayerControl c) {
+            this.control = c;
+        }
+
+        @Override
+        public void run() {
+            if(control != null && control.mPlayer != null) {
+                control.onProgress(control.getCurrentPosition());
             }
-        });
+        }
     }
 
     private void stopTimer(){
@@ -155,9 +162,9 @@ final class PlayerControl implements PlayerListener {
     /**
      * @param key (file-Path or http/rtsp url) to use
      */
-    private void setDataSource(String key){
-        if(mEntity==null || !mEntity.url.equals(key)){
-            mEntity = new PlayerEntity(key);
+    private void createEntityWhenNone(String key,String url){
+        if(mEntity==null || !mEntity.key.equals(key)){
+            mEntity = new PlayerEntity(key,url);
         }
     }
 
@@ -207,6 +214,9 @@ final class PlayerControl implements PlayerListener {
             ex.printStackTrace();
         }finally {
             onComplete(PlayerComplete.STATE_RELEASE);
+            if(mEntity != null){
+                mComplete.remove(mEntity.key);
+            }
             mEntity = null;
             mPlayer = null;
         }
@@ -248,15 +258,15 @@ final class PlayerControl implements PlayerListener {
     }
 
     @Override
-    public void prepare(String key) {
+    public void prepare(String key,String url) {
         Vlog.e(TAG,"----prepare---mEntity is null = "+(mEntity==null));
-        if(mEntity!=null && !mEntity.url.equals(key)){
+        if(mEntity!=null && !mEntity.key.equals(key)){
             release();
         }
         if(mPlayer==null){
             init();
         }
-        setDataSource(key);
+        createEntityWhenNone(key,url);
         if(mEntity.canPrepare){
             prepare();
             setSurface(mSurface);
@@ -279,7 +289,7 @@ final class PlayerControl implements PlayerListener {
                 isPlaying = true;
             }
         }catch (Exception ex){
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
         Vlog.e(TAG,"------isPlaying----"+isPlaying+",key="+key);
         return isPlaying;
@@ -287,7 +297,6 @@ final class PlayerControl implements PlayerListener {
 
     @Override
     public boolean isRelease() {
-        //onProgress(getCurrentPosition()+1);
         return (mPlayer!=null && mEntity == null) || mPlayer==null || mCallback==null;
     }
 
@@ -338,13 +347,9 @@ final class PlayerControl implements PlayerListener {
     }
 
     @Override
-    public void releaseAll() {
+    public void releasePlayer() {
         release();
-        if(mEntity != null){
-            mEntity.canPrepare = true;
-            mEntity.canPlay = false;
-        }
-        mComplete.clear();
+        Vlog.e(TAG,"--mComplete--size="+mComplete.size()+"\n"+mComplete);
         mCallback = null;
     }
 
@@ -417,9 +422,12 @@ final class PlayerControl implements PlayerListener {
     private void onComplete(int state){
         Vlog.e(TAG,"----------onComplete------"+state);
         if(mEntity != null) {
-            String key = mEntity.url;
+            String key = mEntity.key;
             if (mComplete.containsKey(key)) {
                 mComplete.get(key).onComplete(state);
+                if(PlayerComplete.STATE_RELEASE == state) {
+                    mComplete.remove(key);
+                }
             }
         }
     }

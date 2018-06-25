@@ -13,12 +13,12 @@ public interface PlayerListener {
     void setVideoScalingMode(int mode);
     void setSurface(Surface surface);
 
-    void prepare(String key);
+    void prepare(String key,String url);
     void start();
     void seekTo(int millsec);
     void pause();
     void release();
-    void releaseAll();
+    void releasePlayer();
 
     int getDuration();
     int getCurrentPosition();
@@ -28,7 +28,7 @@ public interface PlayerListener {
     void registerPlayer(String key, PlayerCallback callback, PlayerComplete complete);
     void onChanged(String key);
 
-    boolean isPlaying(String key);
+    boolean isPlaying(String url);
     boolean isPlaying();
     boolean isRelease();
 }

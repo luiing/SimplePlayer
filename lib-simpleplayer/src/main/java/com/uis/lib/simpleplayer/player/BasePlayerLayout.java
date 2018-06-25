@@ -21,7 +21,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     public final static int MaxRate = 1000;
     public static int sTimerMills = 3500;
-    protected static PlayerView sPlayer;
     protected PlayerView player;
     protected PlayerComplete mComplete;
     protected PlayerCallback mCallback;
@@ -59,18 +58,12 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     private void innerInit(){
         mCounter = PlayerCounter.createCounter();
-        initPlayer(getContext());
         init();
     }
 
-    static void initPlayer(Context mc){
-        if(sPlayer == null) {
-            sPlayer = new PlayerView(mc);
-            sPlayer.setLayoutParams(
-                    new FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT
-                    ));
+    private void initPlayer(){
+        if(player == null){
+            player = PlayerUtils.initPlayer(getContext().getApplicationContext());
         }
     }
 
@@ -94,12 +87,9 @@ public abstract class BasePlayerLayout extends RelativeLayout {
     }
 
     protected PlayerView createPlayerView(boolean isFull){
-        if(player == null){
-            initPlayer(getContext());
-            player = sPlayer;
-        }
+        initPlayer();
         setFullScreen(isFull);
-        if(player != null && player.getParent()!=null && player.getParent() instanceof ViewGroup){
+        if(player.getParent()!=null && player.getParent() instanceof ViewGroup){
             ViewGroup vg = (ViewGroup)player.getParent();
             vg.removeView(player);
         }
@@ -108,34 +98,6 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     public <T extends View> T id(int resId){
         return (T)findViewById(resId);
-    }
-
-    static void releasePlayer(){
-        sPlayer = null;
-    }
-
-    public static double getRate(int maxRate,int current,int total){
-        return maxRate*(1.0d*current/total);
-    }
-
-    public static String getTime(int current){
-        StringBuilder builder = new StringBuilder();
-        current /= 1000;
-        if(current>60){//60s
-            if(current<600){//600s
-                builder.append("0");
-            }
-            builder.append(current/60);
-        }else{
-            builder.append("00");
-        }
-        builder.append(":");
-        int seconds = current%60;
-        if(seconds<10){//10s
-            builder.append("0");
-        }
-        builder.append(seconds);
-        return builder.toString();
     }
 
     protected void seekTo(int seek){
@@ -177,20 +139,26 @@ public abstract class BasePlayerLayout extends RelativeLayout {
 
     protected void setDataSource(){
         if(player!=null) {
-            player.setDataSource(mUrl, mCallback,isFullScreen ? null : mComplete);
+            player.setDataSource(getContext().hashCode(),mUrl, mCallback,isFullScreen ? null : mComplete);
         }
     }
 
     protected void resize(){
-        if(getHandler()!=null){
-            getHandler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (player != null) {
-                        player.resize();
-                    }
-                }
-            },32);
+        PlayerCounter.mHandler.postDelayed(new InnerResize(player),32);
+    }
+
+    static class InnerResize implements Runnable{
+        PlayerView playerView;
+
+        public InnerResize(PlayerView playerView) {
+            this.playerView = playerView;
+        }
+
+        @Override
+        public void run() {
+            if (playerView != null) {
+                playerView.resize();
+            }
         }
     }
 
