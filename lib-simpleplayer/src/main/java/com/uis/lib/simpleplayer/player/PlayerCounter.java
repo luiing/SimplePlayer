@@ -12,7 +12,7 @@ import java.util.TimerTask;
 
 public class PlayerCounter {
 
-    private static Handler mHandler = new Handler(Looper.getMainLooper());
+    public static Handler mHandler = new Handler(Looper.getMainLooper());
     private Timer mTimer;
 
     public static PlayerCounter createCounter(){

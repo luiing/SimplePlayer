@@ -79,7 +79,7 @@ public class VideoPagerAdapter extends PagerAdapter implements ViewPager.OnPageC
                 });
                 ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(-1, WIDTH);
                 mVideo.setLayoutParams(params);
-                String url = DemoApp.mUrl[2]+"&p100";
+                String url = DemoApp.mUrl[2];
                 mVideo.start(position >= 0 ? url : "", DemoApp.URL);
                 mVideo.setOnScreenListener(new OnScreenListener() {
                     @Override

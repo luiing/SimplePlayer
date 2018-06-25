@@ -199,8 +199,8 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser && tvPlayTime != null && totalTime>0){
-                    int timeTxt = (int)getRate(totalTime,progress,MaxRate);
-                    tvPlayTime.setText(getTime(timeTxt));
+                    int timeTxt = (int)PlayerUtils.getRate(totalTime,progress,MaxRate);
+                    tvPlayTime.setText(PlayerUtils.getTime(timeTxt));
                 }
             }
 
@@ -237,7 +237,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
             public void onComplete(int state) {
                 switch (state){
                     case PlayerComplete.STATE_START:
-                        setTag(getVideoUrl());
+
                         break;
                     case PlayerComplete.STATE_PAUSE:
                         break;
@@ -251,7 +251,7 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                     case PlayerComplete.STATE_RELEASE:
                         isInit = false;
                     case PlayerComplete.STATE_RESET:
-                        setTag(null);
+
                         percentTime = 0;
                         totalTime = 0;
                         initState(false);
@@ -320,13 +320,13 @@ public class PlayerLayout extends BasePlayerLayout implements View.OnClickListen
                     showLoading();
                 }
                 currentTime = current;
-                int rate = total==0 ? 0 : (int)getRate(MaxRate,current,total);
+                int rate = total==0 ? 0 : (int)PlayerUtils.getRate(MaxRate,current,total);
                 pbarRate.setProgress(rate);
                 if(!isSeeking) {
                     sbarRate.setProgress(rate);
-                    tvPlayTime.setText(getTime(current));
+                    tvPlayTime.setText(PlayerUtils.getTime(current));
                 }
-                tvTotalTime.setText(getTime(total));
+                tvTotalTime.setText(PlayerUtils.getTime(total));
                 if(isFullScreen() && percentTime == MAX_PERCENT){
                     pbarRate.setSecondaryProgress(percentTime);
                     sbarRate.setSecondaryProgress(percentTime);
