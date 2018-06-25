@@ -1,6 +1,7 @@
 package com.uis.lib.simpleplayer.player;
 
 import android.os.Handler;
+import android.os.Looper;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,7 +12,7 @@ import java.util.TimerTask;
 
 public class PlayerCounter {
 
-    private Handler mHandler;
+    private static Handler mHandler = new Handler(Looper.getMainLooper());
     private Timer mTimer;
 
     public static PlayerCounter createCounter(){
@@ -19,11 +20,6 @@ public class PlayerCounter {
     }
 
     private PlayerCounter() {
-        try {
-            mHandler = new Handler();
-        }catch (Throwable ex){
-            ex.printStackTrace();
-        }
     }
 
     public void startTimer(int mills,Runnable run){

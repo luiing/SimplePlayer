@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.uis.lib.simpleplayer.PlayerLayout;
+
 /**
  * @author uis on 2017/11/21.
  */
@@ -37,6 +39,7 @@ public class PlayerUtils {
 
     public static void release(){
         PlayerControl.createPlayer().releaseAll();
+        BasePlayerLayout.releasePlayer();
     }
 
     public static void showActionBar(Context mc){
