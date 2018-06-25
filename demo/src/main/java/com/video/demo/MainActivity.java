@@ -1,6 +1,5 @@
 package com.video.demo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,34 +42,35 @@ public class MainActivity extends AppCompatActivity {
             recyclerView.setLayoutManager(layoutManager);
             VideoAdapter adapter = new VideoAdapter();
             int size = DemoApp.mUrl.length;
-            String[] data = new String[1*size+1];
+            String[] data = new String[1*size+2];
             data[0] = "";
             for(int i = 1,t = 1*size+1;i<t;i++){
                 data[i] = DemoApp.mUrl[(i-1)%size];
+            }
+            try {
+                File path = new File(getCacheDir(),"intro.mp4");
+                data[size+1] = path.getPath();
+                Vlog.e("path",path+","+path.exists()+","+path.length()/1024/1024);
+                if(!path.exists()) {
+                    InputStream is = getResources().openRawResource(R.raw.intro);
+                    OutputStream os = new FileOutputStream(path);
+                    byte[] buff = new byte[1024];
+                    while (is.read(buff) > 0) {
+                        os.write(buff);
+                    }
+                    os.flush();
+                    os.close();
+                    is.close();
+                }
+            }catch (Exception ex){
+                ex.printStackTrace();
             }
             adapter.setData(data);
             recyclerView.setAdapter(adapter);
         }else{
             playerLayout.start(DemoApp.mUrl[2],"");
         }
-        try {
-            File path = new File(getCacheDir(),"intro.mp4");
-            DemoApp.mUrl[3] = path.getPath();
-            Vlog.e("path",path+","+path.exists()+","+path.length()/1024/1024);
-            if(!path.exists()) {
-                InputStream is = getResources().openRawResource(R.raw.intro);
-                OutputStream os = new FileOutputStream(path);
-                byte[] buff = new byte[1024];
-                while (is.read(buff) > 0) {
-                    os.write(buff);
-                }
-                os.flush();
-                os.close();
-                is.close();
-            }
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
+
     }
 
     @Override
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if(ScreenConvertor.isPlaying()) {
-            PlayerUtils.start();
+            //PlayerUtils.start();
         }
     }
 
