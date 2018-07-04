@@ -3,7 +3,17 @@
 
 ### 手机自带的MediaPlayer，支持http,https,rtsp
 
-### 播放器只有唯一一组MediaPlayer和Surface在工作,切换视频会复用，内存消耗非常小
+### 播放器原理
+    1.只有唯一的MediaPlayer和Surface在工作,切换视频会复用，内存消耗非常小
+    3.Surface创建使用的是Application.Context,Actiivty关闭不会对其持有引用
+    3.全屏切换会复用Surface防止卡顿，MediaPlayer随url变化，只保持一个
+    4.全屏切换通过Windows.ID_ANDROID_CONTENT 加上一个viewgroup
+        a.全屏横屏
+        ViewGroup.setSystemUiVisibility(SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        b.退出横屏
+        ViewGroup.setSystemUiVisibility(SYSTEM_UI_FLAG_VISIBLE);
+        Activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
 # Use
     compile 'com.uis:lib-simpleplayer:0.2.0'
@@ -15,6 +25,7 @@
     0.1.4 fixed fullscreen bug, add network dnymic changed,add thumb scaleType and holder
     0.1.6 fixed全屏小画面，支持销毁PlayerView
     0.1.8 fixed全屏小画面不能自适应，自动销毁资源
+    0.2.0 stable
 # 效果图
 ![image](/snapshot/2017-1.png)
 
